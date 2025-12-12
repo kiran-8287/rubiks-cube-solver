@@ -1,0 +1,221 @@
+:root {
+  --sticker-size: 70px;
+}
+
+.cube-input-container {
+  display: grid;
+  gap: 16px;
+}
+
+.progress-section {
+  display: grid;
+  gap: 10px;
+}
+
+.progress-section h3 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 14px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  border: 1px solid var(--glass-border);
+  overflow: hidden;
+  position: relative;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #E32636, #FDDA0D, #7CFC00);
+  transition: width 260ms ease;
+  border-radius: inherit;
+}
+
+.progress-text {
+  margin: 0;
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+}
+
+.cube-net {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr auto auto 1fr;
+  grid-template-areas:
+    ". U U ."
+    "L F R B"
+    ". D D .";
+  gap: 16px;
+  justify-items: center;
+  align-items: center;
+  padding: 16px;
+  border-radius: 18px;
+  border: 1px dashed var(--glass-border);
+  background: rgba(255, 255, 255, 0.03);
+  overflow-x: auto;
+  overflow-y: visible;
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+  width: 100%;
+  box-sizing: border-box;
+  -webkit-overflow-scrolling: touch;
+}
+
+.face {
+  display: grid;
+  grid-template-columns: repeat(3, var(--sticker-size));
+  gap: 6px;
+  padding: 10px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--shadow-1);
+}
+
+.face h4 {
+  grid-column: 1 / -1;
+  margin: 0 0 6px;
+  text-align: center;
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  letter-spacing: 0.3px;
+}
+
+.face-U { 
+  grid-area: U; 
+  justify-self: center;
+}
+.face-R { grid-area: R; }
+.face-F { grid-area: F; }
+.face-L { grid-area: L; }
+.face-D { 
+  grid-area: D; 
+  justify-self: center;
+}
+.face-B { grid-area: B; }
+
+.sticker {
+  width: var(--sticker-size);
+  height: var(--sticker-size);
+  border: 1px solid rgba(0, 0, 0, 0.25);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: transform 140ms ease, box-shadow 140ms ease, border-color 140ms ease;
+  box-shadow: inset 0 1px 4px rgba(0,0,0,0.2), 0 6px 12px rgba(0,0,0,0.25);
+  background-color: #f0f0f0;
+  font-weight: 700;
+}
+
+.sticker:hover:not(:disabled) {
+  transform: scale(1.05) translateZ(0);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.35);
+}
+
+.sticker.selected {
+  border: 3px solid #9b6bff;
+  box-shadow: 0 0 0 3px rgba(155, 107, 255, 0.3);
+}
+
+.sticker.empty {
+  background: repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.18) 10px, rgba(0, 0, 0, 0.06) 10px, rgba(0, 0, 0, 0.06) 20px);
+}
+
+/* Breakpoints */
+@media (max-width: 1439px) { /* Desktop LG */
+  :root { --sticker-size: 65px; }
+}
+
+@media (max-width: 1023px) { /* Tablet MD */
+  :root { --sticker-size: 55px; }
+  .cube-net {
+    grid-template-columns: 1fr auto auto 1fr;
+    overflow-x: auto;
+    overflow-y: visible;
+    padding: 14px;
+    gap: 12px;
+    padding-bottom: 18px;
+  }
+  .face {
+    padding: 8px;
+    gap: 5px;
+  }
+}
+
+@media (max-width: 767px) { /* Mobile SM */
+  :root { --sticker-size: 45px; }
+  .cube-net {
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas:
+      "U U"
+      "L F"
+      "R B"
+      "D D";
+    justify-items: center;
+    padding: 10px;
+    gap: 10px;
+    overflow-x: auto;
+    overflow-y: visible;
+    -webkit-overflow-scrolling: touch;
+  }
+  .face {
+    padding: 8px;
+    gap: 4px;
+    max-width: 100%;
+  }
+  .face-U,
+  .face-D {
+    justify-self: center;
+    grid-column: 1 / -1;
+    width: fit-content;
+  }
+  .face h4 {
+    transform: rotate(-90deg);
+    font-size: 0.85rem;
+  }
+  .cube-input-container {
+    gap: 12px;
+  }
+  .progress-section {
+    gap: 8px;
+  }
+}
+
+@media (max-width: 480px) { /* Mobile XS */
+  :root { --sticker-size: 35px; }
+  .cube-net {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "U"
+      "L"
+      "F"
+      "R"
+      "B"
+      "D";
+    padding: 8px;
+    gap: 8px;
+    overflow-x: visible;
+    overflow-y: visible;
+  }
+  .face {
+    justify-self: center;
+    padding: 6px;
+    gap: 3px;
+    width: fit-content;
+  }
+  .face h4 {
+    transform: rotate(0deg);
+    font-size: 0.8rem;
+    margin-bottom: 4px;
+  }
+  .cube-input-container {
+    gap: 10px;
+  }
+  .progress-section h3 {
+    font-size: 0.95rem;
+  }
+  .progress-text {
+    font-size: 0.85rem;
+  }
+}
