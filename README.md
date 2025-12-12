@@ -75,9 +75,98 @@ If the cube is already solved, the app will let you know. If the input is invali
 
 ## How it works
 
-- The cube state is converted to a Kociemba facelet string using `U,R,F,D,L,B` order.
-- A Web Worker (`public/cubeWorker.js`) loads `cubejs` from a CDN and initializes the solver once (`Cube.initSolver()`).
-- On `SOLVE`, the worker constructs a `Cube` from the facelet string and calls `cube.solve()` to compute the move sequence, returning both the full solution string and parsed moves.
+This section explains the full pipeline from user input to the final solution moves.
+
+### 1) Input model (cube net)
+
+- The UI maintains a cube state object with 6 faces: `U, R, F, D, L, B`.
+- Each face has 9 stickers (array of 9 color names): `white, yellow, green, blue, red, orange`.
+
+Example shape:
+
+```js
+{
+  U: ['white', ... 9 items],
+  R: ['red', ... 9 items],
+  F: ['green', ... 9 items],
+  D: ['yellow', ... 9 items],
+  L: ['orange', ... 9 items],
+  B: ['blue', ... 9 items]
+}
+```
+
+State updates are handled by `src/reducers/cubeReducer.js`.
+
+### 2) Validation
+
+Before solving, the app validates the cube using `validateCubeStateComplete(...)` to ensure:
+
+- All 54 stickers are painted.
+- Each color appears exactly 9 times.
+- Basic constraints for a consistent cube state.
+
+If invalid, an error is shown and solving is aborted.
+
+### 3) Conversion to facelet string
+
+The solver expects a Kociemba facelet string (54 chars) in `U,R,F,D,L,B` face order. Conversion happens in `src/utils/conversion.js`:
+
+- Color → facelet mapping:
+  - `white → U`
+  - `yellow → D`
+  - `green → F`
+  - `blue → B`
+  - `red → R`
+  - `orange → L`
+
+Function used by the app: `cubeStateToFacheletString(cubeState)`.
+
+Example (pseudo):
+
+```js
+const faceOrder = ['U','R','F','D','L','B'];
+let s = '';
+for (const face of faceOrder) for (const sticker of cubeState[face]) s += map[sticker];
+// s is the 54-char facelet string
+```
+
+### 4) Web Worker lifecycle and messaging
+
+The heavy solver work is offloaded to a Web Worker: `public/cubeWorker.js`.
+
+- On app mount, `useCubeSolver()` creates the worker and sends `{ action: 'INIT' }`.
+- The worker loads `cubejs` from CDN and runs `Cube.initSolver()` once to build lookup tables.
+- When ready, the worker posts `{ type: 'READY' }`.
+
+Message protocol:
+
+- App → Worker:
+  - `{ action: 'INIT' }`
+  - `{ action: 'SOLVE', facheletString }`
+- Worker → App:
+  - `{ type: 'READY' }`
+  - `{ type: 'SOLVED', solution, moves, moveCount }`
+  - `{ type: 'ERROR', error }`
+
+### 5) Calling the solver (the "formula")
+
+When the user clicks Solve and validation passes:
+
+1. App converts the current state to `facheletString`.
+2. App posts to worker: `{ action: 'SOLVE', facheletString }`.
+3. In the worker:
+   - `const cube = Cube.fromString(facheletString);`
+   - `const solution = cube.solve(); // uses Kociemba search via cubejs`
+   - `const moves = solution.trim().split(/\s+/);`
+4. Worker posts back: `{ type: 'SOLVED', solution, moves, moveCount: moves.length }`.
+
+`cube.solve()` is the key call to the Kociemba-based algorithm implemented by `cubejs`.
+
+### 6) Rendering the solution
+
+- The hook `useCubeSolver()` receives `SOLVED` and exposes `moves` and `solution` to the UI.
+- The UI displays the move list and count, and can walk through the sequence step by step.
+- If the cube is detected as already solved, the app short-circuits and informs the user.
 
 ## Deployment
 
